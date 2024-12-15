@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:intl/intl.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -43,6 +45,8 @@ class _MyHomePageState extends State<CreditCalculatorHomePage> {
   double? _monthlyPayment;
   double? _totalPayment;
   double? _overpayment;
+
+  final numberFormat = NumberFormat('#,##0', 'ru_RU');
 
   @override
   void initState() {
@@ -110,9 +114,9 @@ class _MyHomePageState extends State<CreditCalculatorHomePage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Ежемесячный платеж: ${_monthlyPayment!.toStringAsFixed(2)} ₽'),
-                      Text('Общая сумма выплат: ${_totalPayment!.toStringAsFixed(2)} ₽'),
-                      Text('Переплата: ${_overpayment!.toStringAsFixed(2)} ₽'),
+                      Text('Ежемесячный платеж: ${numberFormat.format(_monthlyPayment!.round())} ₽'),
+                      Text('Общая сумма выплат: ${numberFormat.format(_totalPayment!.round())} ₽'),
+                      Text('Переплата: ${numberFormat.format(_overpayment!.round())} ₽'),
                     ],
                   ),
               ],
@@ -150,6 +154,10 @@ class _MyHomePageState extends State<CreditCalculatorHomePage> {
 
         _monthlyPayment = loanAmount * annuityFactor;
 
+        _totalPayment = _monthlyPayment! * loanTermMonths;
+
+        _overpayment = _totalPayment! - loanAmount;
+
         /// Дифференцированный формула: DP = s/n + OD * i, OD = s - s/n * m где:
         /// DP – дифференцированный платеж; s – первоначальная сумма кредита;
         /// n - количество процентных периодов во всем сроке кредита;
@@ -170,11 +178,6 @@ class _MyHomePageState extends State<CreditCalculatorHomePage> {
         }
 
         /// переплата
-        _overpayment = _totalPayment! - loanAmount;
-      }
-
-      if (_monthlyPayment != null) {
-        _totalPayment = _totalPayment ?? _monthlyPayment! * loanTermMonths;
         _overpayment = _totalPayment! - loanAmount;
       }
 
